@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Video;
 
 [Serializable]
 public class Note
@@ -20,6 +21,7 @@ public class SonataSongData : ScriptableObject
 	public float AudioStartBeatOffset;  //開頭沒聲音的節拍數
 
 	public AudioClip BackgroundTrack;
+	public VideoClip ForegroundTrack;
 
 	[HideInInspector]
 	public List<Note> Notes = new List<Note>();
@@ -99,11 +101,23 @@ public class SonataSongData : ScriptableObject
 		return Notes.Count - 1;
 	}
 
+	/* 為了 MOV 改寫
 	public float GetLengthInSeconds()   //取得AudioClip的時間秒數，否則為0
 	{
 		if (BackgroundTrack)
 		{
 			return BackgroundTrack.length;
+		}
+
+		return 0;
+	}
+	*/
+
+	public float GetLengthInSeconds()   //取得AudioClip的時間秒數，否則為0
+	{
+		if (ForegroundTrack)
+		{
+			return (float)ForegroundTrack.length;
 		}
 
 		return 0;
