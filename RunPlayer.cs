@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEngine.Video;
 
@@ -11,15 +11,27 @@ public class RunPlayer : MonoBehaviour
 	protected bool WasPlaying = false;
 	protected bool IsSongPlaying = false;
 
+	protected MovShowData Mov;
+	public float videoTime;
+
+	void Start()
+	{
+		Mov = GameObject.Find("Mov").GetComponent<MovShowData>();
+		videoTime = 0;
+	}
+
 	void Update()
 	{
+		/*
 		if (IsPlaying())
 		{
 			AudioStopEventFired = false;
 			WasPlaying = true;
 			UpdateSmoothAudioTime();
-			Debug.Log("現在時間是" + SmoothAudioTime);
 		}
+		*/
+
+		videoTime = Mov.GetVideoTime();
 	}
 
 	protected void OnSongStopped()
@@ -28,8 +40,6 @@ public class RunPlayer : MonoBehaviour
 		{
 			return;
 		}
-
-
 
 		//I want to check if the song has finished playing automatically.
 		//Sometimes this is triggered when the song is at the end, 
@@ -95,8 +105,8 @@ public class RunPlayer : MonoBehaviour
 		}
 		else
 		{
-			GetComponent<AudioSource>().Play();
-			SmoothAudioTime = GetComponent<AudioSource>().time;
+			//GetComponent<AudioSource>().Play();
+			//SmoothAudioTime = GetComponent<AudioSource>().time;
 		}
 	}
 
@@ -104,7 +114,7 @@ public class RunPlayer : MonoBehaviour
 	{
 		yield return new WaitForSeconds(delay);
 
-		GetComponent<AudioSource>().Play();
+		//GetComponent<AudioSource>().Play();
 	}
 
 	public void Pause()
