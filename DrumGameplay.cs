@@ -10,14 +10,11 @@ public class DrumGameplay : MonoBehaviour
 
 	/* 似乎沒用到?
 	//public bool[] StringHasNote = new bool[7];
-	//public int CheckFrequency = 0;
-	//public int RefreshRate;
+
 	//public bool[] drumStringIndex = new bool[7];
 	*/
 
 	//References to important objects or components
-	protected SonataControlInput ControlInput;
-	//protected SonataPlayer Player;  //測試期間常常要改
     protected RunPlayer Player;	//測試期間常常要改
 	protected List<GameObject> NoteObjects;
 	protected Color[] Colors;   //了解
@@ -26,11 +23,8 @@ public class DrumGameplay : MonoBehaviour
 	void Start()
 	{
 		//Init references to external objects/components
-		ControlInput = GameObject.Find("Music Visualizator (v2)").GetComponent<SonataControlInput>();    //測試期間常常要改
-		//ControlInput = GameObject.Find("Mov").GetComponent<SonataControlInput>();    //測試期間常常要改
-		//ControlInput = GameObject.Find("NoSoundMusic").GetComponent<SonataControlInput>();    //測試期間常常要改
-		//Player = GetComponent<SonataPlayer>();	//測試期間常常要改
-		Player = GameObject.Find("NoSoundMusic").GetComponent<RunPlayer>();	//測試期間常常要改
+	
+		Player = GameObject.Find("NoSoundMusic").GetComponent<RunPlayer>();
 
 		NoteObjects = new List<GameObject>();   //音符物件
 		Colors = new Color[7];
@@ -45,62 +39,32 @@ public class DrumGameplay : MonoBehaviour
 
 		//永遠只會抓第一首歌，程式碼要修改
 		SonataSongData[] playlist = GetComponent<DrumGameplay>().GetPlaylist();
-		GetComponent<DrumGameplay>().StartPlaying(2);
+		GetComponent<DrumGameplay>().StartPlaying(2);	//要第幾首歌就是從這裡傳
 
 	}
 
     void Update()
 	{
-		
 		if (Player.IsPlaying())
 		{
-			UpdateNotes();  //懂一半吧?
+			UpdateNotes();
 		}
 	}
 
-	/*
-    private void FixedUpdate()
-    {
-		ResetDrumStringIndex();
-	}
-	*/
-
-	/*
-    private void ResetDrumStringIndex()
-    {
-		for (int i = 0; i < drumStringIndex.Length; i++)
-			drumStringIndex[i] = false;
-    }
-	*/
-
 	public void StartPlaying(int playlistIndex)
 	{
-
-		Player.SetSong(Playlist[playlistIndex]);    //轉換 MOV 必須關掉
-
+		Player.SetSong(Playlist[playlistIndex]);
 		Player.Play();
-
-		CreateNoteObjects();    //產生音符物體
-
+		CreateNoteObjects();
 	}
-
-	/*
-	public void CheckHitDrum(int aIndex)
-    {
-		drumStringIndex[aIndex] = true;
-	}
-	*/
 
 	protected void CreateNoteObjects()
 	{
-		NoteObjects.Clear();    //音符陣列先清空
+		NoteObjects.Clear();
 
 		for (int i = 0; i < Player.Song.Notes.Count; ++i)
 		{
-			//if( Player.Song.Notes[ i ].StringIndex != 0 && Player.Song.Notes[ i ].StringIndex != 4 )
-			{
-				//Create note and trail objects
-				GameObject note = InstantiateNoteFromPrefab(Player.Song.Notes[i].StringIndex);
+			GameObject note = InstantiateNoteFromPrefab(Player.Song.Notes[i].StringIndex);
 
 				//Hide object on start, they will be shown - when appropriate - in the UpdateNotes routine
 				note.GetComponent<Renderer>().enabled = false;
@@ -110,9 +74,7 @@ public class DrumGameplay : MonoBehaviour
 #else
 				note.active = false;
 #endif
-
 				NoteObjects.Add(note);
-			}
 		}
 	}
 
@@ -121,27 +83,25 @@ public class DrumGameplay : MonoBehaviour
 		return Playlist;
 	}
 
-	protected void UpdateNotes()    //懂一半吧?
+	protected void UpdateNotes() 
 	{
 		for (int i = 0; i < NoteObjects.Count; ++i)
 		{
-			UpdateNotePosition(i);  //看得懂
+			UpdateNotePosition(i);
 
 			/* 暫時用不到 2020/10/05
 			if (IsNoteHit(i))
 			{
 				HideNote(i);    //打中音符，音符就會隱藏但未消失
 			}
+			*/
 
 			if (WasNoteMissed(i))
 			{
 				HideNote(i);
 			}
-			*/
 		}
 	}
-
-	
 
 	protected void HideNote(int index)  //把音符隱藏起來
 	{
@@ -151,11 +111,6 @@ public class DrumGameplay : MonoBehaviour
 	protected bool IsNoteHit(int index)
 	{
 		Note note = Player.Song.Notes[index];
-
-		/*
-		if (!drumStringIndex[note.StringIndex])
-			return false;
-		*/
 
 		//When the renderer is disabled, this note was already hit before
 		if (NoteObjects[index].GetComponent<Renderer>().enabled == false)   //被打過的音符不能再被打中
@@ -177,6 +132,7 @@ public class DrumGameplay : MonoBehaviour
 	protected bool WasNoteMissed(int index) //看懂
 	{
 		Note note = Player.Song.Notes[index];
+		int stringIndex = note.StringIndex; 
 
 		if (IsInHitZone(index)) //如果音符在可打擊範圍內
 		{
@@ -184,7 +140,7 @@ public class DrumGameplay : MonoBehaviour
 		}
 
 		//If position.z is greater than 0, this note can still be hit
-		if (NoteObjects[index].transform.position.z > -2)  //卡的距離和 GetHitZoneEnd() 不一致
+		if (NoteObjects[index].transform.position.z > (GetHitZoneEnd(stringIndex)-0))  //卡的距離比 GetHitZoneEnd() 多一些些
 		{
 			return false;
 		}
@@ -194,6 +150,7 @@ public class DrumGameplay : MonoBehaviour
 		{
 			return false;
 		}
+
 		return true;
 	}
 
@@ -222,8 +179,8 @@ public class DrumGameplay : MonoBehaviour
 			}
 
 			//Calculate how far the note has progressed on the neck
-			float progress = (note.Time - Player.GetCurrentBeat() - 1f) / 6f;	//吉他遊戲是差 0.5 拍，我改成差 1 拍
-			//這裡面的參數是特別調整過的，更改的話視覺效果會很怪異
+			float progress = (note.Time - Player.GetCurrentBeat() - 1f) / 6f;   //吉他遊戲是差 0.5 拍，我改成差 1 拍
+																				//這裡面的參數是特別調整過的，更改的話視覺效果會很怪異
 
 			//Update its position
 			Vector3 position = NoteObjects[index].transform.position;
@@ -241,50 +198,12 @@ public class DrumGameplay : MonoBehaviour
 
     protected bool IsInHitZone(int index) //是否音符在可打擊區域內
 	{
-		GameObject note = NoteObjects[index];
-		int XValue = Mathf.FloorToInt((note.transform.position.x * 10)); //已經沒辦法取音符的 index 值了，只好從 x 座標來判斷音符在哪條弦上
-		return note.transform.position.z < GetHitZoneBeginning(XValue)
-			&& note.transform.position.z > GetHitZoneEnd(XValue);
-	}
+		GameObject noteObj = NoteObjects[index];
+		Note noteData = Player.Song.Notes[index];
+		int stringIndex = noteData.StringIndex;
 
-	private float GetXCoordinate(float xposition)	//經過碰撞之後音符會翻轉換位，只好也固定 X 座標
-	{
-		if (-0.95 < xposition && xposition < -0.8)
-        {
-			return -0.8881167f;
-		}
-
-		if (-0.8 < xposition && xposition < -0.65)
-		{
-			return -0.7173551f;
-		}
-
-		if (-0.6 < xposition && xposition < -0.45)
-		{
-			return -0.532649f;
-		}
-
-		if (-0.25 < xposition && xposition < -0.1)
-		{
-			return -0.1783119f;
-		}
-
-		if (0.1 < xposition && xposition < 0.2)
-		{
-			return 0.1466231f;
-		}
-
-		if (0.5 < xposition && xposition < 0.65)
-		{
-			return 0.5819693f;
-		}
-
-		if (0.8 < xposition && xposition < 0.9)
-		{
-			return 0.851892f;
-		}
-
-		return 2;
+		return noteObj.transform.position.z < GetHitZoneBeginning(stringIndex)
+			&& noteObj.transform.position.z > GetHitZoneEnd(stringIndex);
 	}
 
 	protected float GetYDisplacement()   //Y 的總位移量
@@ -325,19 +244,19 @@ public class DrumGameplay : MonoBehaviour
 		switch (StringIndex)
 		{
 			case 0:
-				return -1.125f;
+				return -1.275f;
 			case 1:
-				return -0.85f;
+				return -0.95f;
 			case 2:
-				return -1.125f;
+				return -1.275f;
 			case 3:
-				return -1.0f;
+				return -1.15f;
 			case 4:
-				return -1.0f;
+				return -1.15f;
 			case 5:
-				return -1.125f;
+				return -1.275f;
 			case 6:
-				return -1.125f;
+				return -1.275f;
 			default:
 				return 0;
 		}
@@ -374,53 +293,52 @@ public class DrumGameplay : MonoBehaviour
 									 ) as GameObject;
 
 		note.GetComponent<Renderer>().material.color = Colors[stringIndex];   //預設音符為紅色，上弦前要改顏色
-		//測試看看0926  note.transform.Rotate(new Vector3(-90, 0, 0));  //預設音符是站著，要轉方向
 
 		return note;
 	}
 
-	protected float GetHitZoneBeginning(int XValue)   // 不同弦上的音符開始可以被打到的位置不同
+	protected float GetHitZoneBeginning(int stringIndex)   // 不同弦上的音符開始可以被打到的位置不同
 	{
-        switch (XValue)
+        switch (stringIndex)
         {
-			case -9:   //第一根弦 X 座標為 -0.8881167，乘 10 倍取地板值
+			case 0:   
 				return -0.5f;
-			case -8:   //第二根弦 X 座標為 -0.7173551，乘 10 倍取地板值
+			case 1:   
 				return -0.5f;
-			case -6:   //第三根弦 X 座標為 -0.532649，乘 10 倍取地板值
+			case 2:   
 				return -0.5f;
-			case -2:   //第四根弦 X 座標為 -0.1783119，乘 10 倍取地板值
+			case 3:   
 				return -0.5f;
-			case 1:   //第五根弦 X 座標為 0.1466231，乘 10 倍取地板值
+			case 4:   
 				return -0.5f;
-			case 5:   //第六根弦 X 座標為 0.5819693，乘 10 倍取地板值
+			case 5:   
 				return -0.5f;
-			case 8:   //第七根弦 X 座標為 0.851892，乘 10 倍取地板值
+			case 6:   
 				return -0.5f;
 			default:    //預設值，推測用不到，寫保險的
 				return -0.5f;
 		}	
 	}
 
-	protected float GetHitZoneEnd(int XValue) // 不同弦上的音符最後可以被打到的位置不同
+	protected float GetHitZoneEnd(int stringIndex) // 不同弦上的音符最後可以被打到的位置不同
 	{
-		switch (XValue)
+		switch (stringIndex)
 		{
-			case -9:   //第一根弦 X 座標為 -0.8881167，乘 10 倍取地板值
-				return -2f;
-			case -8:   //第二根弦 X 座標為 -0.7173551，乘 10 倍取地板值
-				return -2f;
-			case -6:   //第三根弦 X 座標為 -0.532649，乘 10 倍取地板值
-				return -2f;
-			case -2:   //第四根弦 X 座標為 -0.1783119，乘 10 倍取地板值
-				return -2f;
-			case 1:   //第五根弦 X 座標為 0.1466231，乘 10 倍取地板值
-				return -2f;
-			case 5:   //第六根弦 X 座標為 0.5819693，乘 10 倍取地板值
-				return -2f;
-			case 8:   //第七根弦 X 座標為 0.851892，乘 10 倍取地板值
-				return -2f;
-			default:    //預設值，推測用不到，寫保險的
+			case 0:  
+				return -1.5f;
+			case 1:   
+				return -1.1f;
+			case 2:  
+				return -1.4f;
+			case 3:   
+				return -1.2f;
+			case 4:  
+				return -1.2f;
+			case 5:   
+				return -1.4f;
+			case 6:   
+				return -1.4f;
+			default:    
 				return -2f;
 		}
 	}
