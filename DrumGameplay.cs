@@ -39,7 +39,7 @@ public class DrumGameplay : MonoBehaviour
 
 		//永遠只會抓第一首歌，程式碼要修改
 		SonataSongData[] playlist = GetComponent<DrumGameplay>().GetPlaylist();
-		GetComponent<DrumGameplay>().StartPlaying(2);	//要第幾首歌就是從這裡傳
+		GetComponent<DrumGameplay>().StartPlaying(0);	//要第幾首歌就是從這裡傳
 
 	}
 
