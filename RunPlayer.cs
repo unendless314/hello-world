@@ -12,7 +12,6 @@ public class RunPlayer : MonoBehaviour
 	protected bool IsSongPlaying = false;
 	public bool SongFinished = false;
 
-	protected MovShowData movData;
 	protected VideoPlayer movPlayer;
 	public float videoTime;
 	public float videoLength;
@@ -20,15 +19,15 @@ public class RunPlayer : MonoBehaviour
 
 	void Start()
 	{
-		movData = GameObject.Find("Mov").GetComponent<MovShowData>();
 		movPlayer = GameObject.Find("Mov").GetComponent<VideoPlayer>();
-		videoTime = movData.videoTime;
-		videoLength = movData.videoLength;
+
+		videoTime = (float)movPlayer.time;
+		videoLength = (float)movPlayer.clip.length;
 	}
 
 	void Update()
 	{
-		videoTime = movData.GetVideoTime();
+		videoTime = (float)movPlayer.time;
 
 		if (IsPlaying())
 		{
