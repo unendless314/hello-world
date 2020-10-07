@@ -9,7 +9,7 @@ public class RunPlayer : MonoBehaviour
 	protected float SmoothAudioTime = 0f;
 	protected bool AudioStopEventFired = false;
 	protected bool WasPlaying = false;
-	public bool IsSongPlaying = false;
+	protected bool IsSongPlaying = false;
 	public bool SongFinished = false;
 
 	protected VideoPlayer movPlayer;
