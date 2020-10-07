@@ -9,7 +9,7 @@ public class RunPlayer : MonoBehaviour
 	protected float SmoothAudioTime = 0f;
 	protected bool AudioStopEventFired = false;
 	protected bool WasPlaying = false;
-	protected bool IsSongPlaying = false;
+	public bool IsSongPlaying = false;
 	public bool SongFinished = false;
 
 	protected VideoPlayer movPlayer;
@@ -50,12 +50,17 @@ public class RunPlayer : MonoBehaviour
 		//I want to check if the song has finished playing automatically.
 		//Sometimes this is triggered when the song is at the end, 
 		//and sometimes it has already been reset to the beginning of the song.
+		/*
 		if (movPlayer.time == movPlayer.clip.length
 		 || (WasPlaying && movPlayer.time == 0))
 		{
 			IsSongPlaying = false;
 			SongFinished = true;
 		}
+		*/
+
+		IsSongPlaying = false;
+		SongFinished = true;	//讀取 movPlayer 的時間往往會有些微的秒數落後，造成無法順利結束，只好搬到外面
 	}
 
 	protected void UpdateSmoothAudioTime()  //因為audio.time的單位時間比time.deltaTime還要更短，直接取audio.time音符的移動會不順暢
@@ -124,7 +129,7 @@ public class RunPlayer : MonoBehaviour
 	}
 	*/
 
-	public void Pause()
+		public void Pause()
 	{
 		IsSongPlaying = false;
 		SongFinished = false;
