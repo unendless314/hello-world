@@ -5,8 +5,11 @@ using System;
 
 public class DrumGameplay : MonoBehaviour
 {
+	public int ChooseSongNumber;
 	public GameObject NotePrefab;
 	public SonataSongData[] Playlist;
+	public bool PlayAndPause;
+	public bool StopSong;
 
 	/* 似乎沒用到?
 	//public bool[] StringHasNote = new bool[7];
@@ -37,10 +40,8 @@ public class DrumGameplay : MonoBehaviour
 		Colors[5] = new Color(1, 0.92f, 0.016f, 1);
 		Colors[6] = new Color(0.5f, 0.5f, 0.5f, 1);
 
-		//永遠只會抓第一首歌，程式碼要修改
-		SonataSongData[] playlist = GetComponent<DrumGameplay>().GetPlaylist();
-		GetComponent<DrumGameplay>().StartPlaying(0);	//要第幾首歌就是從這裡傳
-
+		PlayAndPause = false;
+		StopSong = false;
 	}
 
     void Update()
@@ -48,11 +49,44 @@ public class DrumGameplay : MonoBehaviour
 		if (Player.IsPlaying())
 		{
 			UpdateNotes();
+
+            if (!PlayAndPause)
+            {
+				Player.Pause(); //正在播音樂，但取消勾勾，表示暫停播放
+			}
+		}
+		else //沒有播音樂
+		{
+			if (PlayAndPause)
+			{
+                if (Player.videoTime > 0 && Player.showSAT > 0)
+                {
+					Player.Play();  //繼續剛才的播放
+				}
+                else
+                {
+					//沒有播音樂，且選取打勾，且秒數為 0，表示重新開始播放
+					GetComponent<DrumGameplay>().StartPlaying((ChooseSongNumber - 1));  //要第幾首歌就是從這裡傳
+				}
+			}
+		}
+
+		if (StopSong)   //不管有沒有播音樂，選取勾勾就表示音樂停止並結束
+		{
+			Player.Stop();
+
+            for (int i = 0; i < Player.Song.Notes.Count; i++)
+            {
+				Destroy(NoteObjects[i]);
+			}
+			NoteObjects.Clear();
 		}
 	}
 
-	public void StartPlaying(int playlistIndex)
+
+    public void StartPlaying(int playlistIndex)
 	{
+		SonataSongData[] playlist = GetComponent<DrumGameplay>().GetPlaylist();
 		Player.SetSong(Playlist[playlistIndex]);
 		Player.Play();
 		CreateNoteObjects();
@@ -262,10 +296,22 @@ public class DrumGameplay : MonoBehaviour
 		}
 	}
 
+	protected GameObject InstantiateNoteFromPrefab(int stringIndex)    //了解
+	{
+		GameObject note = Instantiate(NotePrefab
+									 , GetStartPosition(stringIndex)
+									 , GetStartRotation(stringIndex)
+									 );
+		
+		note.GetComponent<Renderer>().material.color = Colors[stringIndex];   //預設音符為白色，上弦前要改顏色
+
+		return note;
+	}
+
 	protected Vector3 GetStartPosition(int stringIndex) //了解，呼叫音符的起始座標
 	{
-        switch (stringIndex)
-        {
+		switch (stringIndex)
+		{
 			case 0:
 				return new Vector3(-0.8881167f, 1.915157f, 2.402217f);
 			case 1:
@@ -285,19 +331,37 @@ public class DrumGameplay : MonoBehaviour
 		}
 	}
 
-	protected GameObject InstantiateNoteFromPrefab(int stringIndex)    //了解
-	{
-		GameObject note = Instantiate(NotePrefab
-									 , GetStartPosition(stringIndex)
-									 , Quaternion.identity
-									 ) as GameObject;
+	protected Quaternion GetStartRotation(int stringIndex)	//我真的不明白為什麼要角度值要正反互換，反正能用就好
+    {
+		switch (stringIndex)
+		{
+			case 0:
+				return Quaternion.Euler(0, 0, -54.063f);
 
-		note.GetComponent<Renderer>().material.color = Colors[stringIndex];   //預設音符為紅色，上弦前要改顏色
+			case 1:
+				return Quaternion.Euler(0, 0, -64.037f);
 
-		return note;
+			case 2:
+				return Quaternion.Euler(0, 0, -25.313f);
+
+			case 3:
+				return Quaternion.Euler(0, 0, -19.574f);
+
+			case 4:
+				return Quaternion.Euler(0, 0, 21.351f);
+
+			case 5:
+				return Quaternion.Euler(0, 0, 21.568f);
+
+			case 6:
+				return Quaternion.Euler(0, 0, 56.247f);
+
+			default:
+				return Quaternion.identity;
+		}
 	}
 
-	protected float GetHitZoneBeginning(int stringIndex)   // 不同弦上的音符開始可以被打到的位置不同
+    protected float GetHitZoneBeginning(int stringIndex)   // 不同弦上的音符開始可以被打到的位置不同
 	{
         switch (stringIndex)
         {
