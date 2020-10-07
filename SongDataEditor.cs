@@ -11,7 +11,7 @@ public class SongDataEditor : Editor
 	private static Texture2D _coloredLineTexture;
 	private static Color _coloredLineColor;
 
-	private GameObject musicVisualizator;
+	private GameObject SheetsManager;
 	private AudioSource MetronomeSource;
 	private SonataPlayer SonataPlayer;
 
@@ -52,16 +52,15 @@ public class SongDataEditor : Editor
 	protected void OnEnable()   //作者弄好好了，抓出遊戲物件中的節拍器，不用改
 	{
 		//Setup object references
-		//musicVisualizator = GameObject.Find("Music Visualizator");     //測試期間這邊要常常改
-		musicVisualizator = GameObject.Find("Mov");     //測試期間這邊要常常改
-		//musicVisualizator = GameObject.Find("NoSoundMusic");  //測試期間這邊要常常改
+		SheetsManager = GameObject.Find("SheetsManager");     //測試期間這邊要常常改
+																	  
 
-		if (musicVisualizator == null)
+		if (SheetsManager == null)
 		{
 			return;
 		}
 
-		SonataPlayer = musicVisualizator.GetComponent<SonataPlayer>();
+		SonataPlayer = SheetsManager.GetComponent<SonataPlayer>();
 		MetronomeSource = GameObject.Find("Metronome").GetComponent<AudioSource>();
 
 		//Prepare playback
@@ -173,21 +172,11 @@ public class SongDataEditor : Editor
 			}
 		}
 
-		/*	為了 MOV 改寫
-		if (GUI.changed)
-		{
-			SonataSongData targetData = target as SonataSongData;
-			if (targetData.BackgroundTrack != null && SonataPlayer.Song != targetData)
-			{
-				SonataPlayer.SetSong(targetData); //可以用拖曳的方式新增和變換歌曲
-			}
-		}
-		*/
 
 		if (GUI.changed)
 		{
 			SonataSongData targetData = target as SonataSongData;
-			if (targetData.ForegroundTrack != null && SonataPlayer.Song != targetData)
+			if (targetData.BackgroundTrack != null && SonataPlayer.Song != targetData)
 			{
 				SonataPlayer.SetSong(targetData); //可以用拖曳的方式新增和變換歌曲
 			}
@@ -203,18 +192,18 @@ public class SongDataEditor : Editor
 		{
 			case KeyCode.UpArrow:
 				//Up arrow advances the song by one beat
-				musicVisualizator.GetComponent<VideoPlayer>().time += BeatsToSeconds(1f, SonataPlayer.Song.BeatsPerMinute);
+				SheetsManager.GetComponent<AudioSource>().time += BeatsToSeconds(1f, SonataPlayer.Song.BeatsPerMinute);
 				e.Use();
 				break;
 			case KeyCode.DownArrow:
 				//Down arrow rewinds the song by one beat
-				if (musicVisualizator.GetComponent<VideoPlayer>().time >= BeatsToSeconds(1f, SonataPlayer.Song.BeatsPerMinute))
+				if (SheetsManager.GetComponent<AudioSource>().time >= BeatsToSeconds(1f, SonataPlayer.Song.BeatsPerMinute))
 				{
-					musicVisualizator.GetComponent<VideoPlayer>().time -= BeatsToSeconds(1f, SonataPlayer.Song.BeatsPerMinute);
+					SheetsManager.GetComponent<AudioSource>().time -= BeatsToSeconds(1f, SonataPlayer.Song.BeatsPerMinute);
 				}
 				else
 				{
-					musicVisualizator.GetComponent<VideoPlayer>().time = 0;
+					SheetsManager.GetComponent<AudioSource>().time = 0;
 				}
 
 				e.Use();
@@ -277,15 +266,11 @@ public class SongDataEditor : Editor
 				break;
 
 				/*
-
 				一定要追加這幾行改寫
-
 			case KeyCode.Alpha8:
 				AddNewNoteAtCurrentTime( 7 );
 				break;
-
 				真意外我居然看得懂
-
 				 */
 		}
 	}
@@ -329,9 +314,9 @@ public class SongDataEditor : Editor
 
 	protected void DrawInspector()
 	{
-		if (musicVisualizator == null)
+		if (SheetsManager == null)
 		{
-			WarningBox("Mov Object could not be found.");
+			WarningBox("SheetsManager Object could not be found.");
 			WarningBox("Did you load the GuitarUnity scene?");
 			return;
 		}
@@ -344,17 +329,9 @@ public class SongDataEditor : Editor
 
 		DrawDefaultInspector();
 
-		/* 為了 MOV 改寫
 		if (SonataPlayer.Song.BackgroundTrack == null)
 		{
 			WarningBox("Please set a background track!");
-			return;
-		}
-		*/
-
-		if (SonataPlayer.Song.ForegroundTrack == null)
-		{
-			WarningBox("Please set a Foreground track!");
 			return;
 		}
 
@@ -486,7 +463,7 @@ public class SongDataEditor : Editor
 		GUILayout.Space(15);
 		GUILayout.Label("Playback Speed", EditorStyles.label);
 		//MovObject.GetComponent<VideoPlayer>().GetComponent<AudioSource>().pitch = GUILayout.HorizontalSlider(MovObject.GetComponent<VideoPlayer>().GetComponent<AudioSource>().pitch, 0, 1);
-		musicVisualizator.GetComponent<VideoPlayer>().playbackSpeed = GUILayout.HorizontalSlider(musicVisualizator.GetComponent<VideoPlayer>().playbackSpeed, 0, 1);
+		SheetsManager.GetComponent<AudioSource>().pitch = GUILayout.HorizontalSlider(SheetsManager.GetComponent<AudioSource>().pitch, 0, 1);
 		EditorGUILayout.EndHorizontal();
 
 		//Draw Use Metronome toggle
@@ -574,12 +551,12 @@ public class SongDataEditor : Editor
 
 	protected bool IsPlaying()
 	{
-		if (musicVisualizator == null)
+		if (SheetsManager == null)
 		{
 			return false;
 		}
 
-		return musicVisualizator.GetComponent<VideoPlayer>().isPlaying;
+		return SheetsManager.GetComponent<AudioSource>().isPlaying;
 	}
 
 	protected void DrawMainView()
@@ -827,9 +804,9 @@ public class SongDataEditor : Editor
 		Rect rect = GetProgressViewRect();
 
 		float previewProgress = 0f;
-		if (musicVisualizator && musicVisualizator.GetComponent<VideoPlayer>().clip)
+		if (SheetsManager && SheetsManager.GetComponent<AudioSource>().clip)
 		{
-			previewProgress = (float)musicVisualizator.GetComponent<VideoPlayer>().time / (float)musicVisualizator.GetComponent<VideoPlayer>().clip.length;
+			previewProgress = SheetsManager.GetComponent<AudioSource>().time / SheetsManager.GetComponent<AudioSource>().clip.length;
 		}
 
 		float previewProgressTop = rect.yMin + rect.height * (1 - previewProgress);
@@ -868,7 +845,7 @@ public class SongDataEditor : Editor
 	{
 		float progress = 1 - (float)(mousePosition.y - SongViewRect.yMin) / SongViewRect.height;
 
-		musicVisualizator.GetComponent<VideoPlayer>().time = musicVisualizator.GetComponent<VideoPlayer>().clip.length * progress;
+		SheetsManager.GetComponent<AudioSource>().time = SheetsManager.GetComponent<AudioSource>().clip.length * progress;
 	}
 
 	protected void OnPlayPauseClicked() //如果編輯器中按下了 Play Song
@@ -877,26 +854,26 @@ public class SongDataEditor : Editor
 
 		if (IsPlaying())
 		{
-			musicVisualizator.GetComponent<VideoPlayer>().Pause();   //播放中按 Play 反而會暫停
+			SheetsManager.GetComponent<AudioSource>().Pause();   //播放中按 Play 反而會暫停
 			EditorUtility.SetDirty(target);
 		}
 		else
 		{
-			musicVisualizator.GetComponent<VideoPlayer>().Play();
-			musicVisualizator.GetComponent<VideoPlayer>().Pause();
-			musicVisualizator.GetComponent<VideoPlayer>().Play();
+			SheetsManager.GetComponent<AudioSource>().Play();
+			SheetsManager.GetComponent<AudioSource>().Pause();
+			SheetsManager.GetComponent<AudioSource>().Play();
 		}
 	}
 
 	protected void OnStopClicked()  //如果編輯器中按下了 Stop Song
 	{
-		if (!musicVisualizator)
+		if (!SheetsManager)
 		{
 			return;
 		}
 
-		musicVisualizator.GetComponent<VideoPlayer>().Stop();    //音檔停止
-		musicVisualizator.GetComponent<VideoPlayer>().time = 0f; //回溯到 0 拍
+		SheetsManager.GetComponent<AudioSource>().Stop();    //音檔停止
+		SheetsManager.GetComponent<AudioSource>().time = 0f; //回溯到 0 拍
 		LastMetronomeBeat = -Mathf.Ceil(SonataPlayer.Song.AudioStartBeatOffset);
 		EditorUtility.SetDirty(target);
 	}
