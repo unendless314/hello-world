@@ -5,9 +5,11 @@ using System;
 
 public class DrumGameplay : MonoBehaviour
 {
-	public int ChooseSongNumber;
-	public GameObject NotePrefab;
+	public GameObject NotePrefab1, NotePrefab2, NotePrefab3, NotePrefab4, NotePrefab5, NotePrefab6, NotePrefab7;
+	public Transform NoteEnd1, NoteEnd2, NoteEnd3, NoteEnd4, NoteEnd5, NoteEnd6, NoteEnd7;
+
 	public SonataSongData[] Playlist;
+	public int ChooseSongNumber;
 	public bool PlayAndPause;
 	public bool StopSong;
 
@@ -27,7 +29,7 @@ public class DrumGameplay : MonoBehaviour
 	{
 		//Init references to external objects/components
 	
-		Player = GameObject.Find("NoSoundMusic").GetComponent<RunPlayer>();
+		Player = GameObject.Find("SheetsManager").GetComponent<RunPlayer>();
 
 		NoteObjects = new List<GameObject>();   //音符物件
 		Colors = new Color[7];
@@ -298,7 +300,7 @@ public class DrumGameplay : MonoBehaviour
 
 	protected GameObject InstantiateNoteFromPrefab(int stringIndex)    //了解
 	{
-		GameObject note = Instantiate(NotePrefab
+		GameObject note = Instantiate(GetNotePrefab(stringIndex)
 									 , GetStartPosition(stringIndex)
 									 , GetStartRotation(stringIndex)
 									 );
@@ -308,7 +310,30 @@ public class DrumGameplay : MonoBehaviour
 		return note;
 	}
 
-	protected Vector3 GetStartPosition(int stringIndex) //了解，呼叫音符的起始座標
+    private GameObject GetNotePrefab(int stringIndex)
+    {
+		switch (stringIndex)
+		{
+			case 0:
+				return NotePrefab1;
+			case 1:
+				return NotePrefab2;
+			case 2:
+				return NotePrefab3;
+			case 3:
+				return NotePrefab4;
+			case 4:
+				return NotePrefab5;
+			case 5:
+				return NotePrefab6;
+			case 6:
+				return NotePrefab7;
+			default:
+				return NotePrefab1;
+		}
+    }
+
+    protected Vector3 GetStartPosition(int stringIndex) //了解，呼叫音符的起始座標
 	{
 		switch (stringIndex)
 		{
@@ -333,52 +358,49 @@ public class DrumGameplay : MonoBehaviour
 
 	protected Quaternion GetStartRotation(int stringIndex)	//我真的不明白為什麼要角度值要正反互換，反正能用就好
     {
+		return Quaternion.identity;
+
+		/*	暫時用不到
 		switch (stringIndex)
 		{
 			case 0:
-				return Quaternion.Euler(0, 0, -54.063f);
-
+				return Quaternion.identity;    //Quaternion.Euler(0, 0, -54.063f);
 			case 1:
-				return Quaternion.Euler(0, 0, -64.037f);
-
+				return Quaternion.identity;    //Quaternion.Euler(0, 0, -64.037f);
 			case 2:
-				return Quaternion.Euler(0, 0, -25.313f);
-
+				return Quaternion.identity;    //Quaternion.Euler(0, 0, -25.313f);
 			case 3:
-				return Quaternion.Euler(0, 0, -19.574f);
-
+				return Quaternion.identity;    //Quaternion.Euler(0, 0, -19.574f);
 			case 4:
-				return Quaternion.Euler(0, 0, 21.351f);
-
+				return Quaternion.identity; //Quaternion.Euler(0, 0, 21.351f);
 			case 5:
-				return Quaternion.Euler(0, 0, 21.568f);
-
+				return Quaternion.identity; //Quaternion.Euler(0, 0, 21.568f);
 			case 6:
-				return Quaternion.Euler(0, 0, 56.247f);
-
+				return Quaternion.identity; //Quaternion.Euler(0, 0, 56.247f);
 			default:
 				return Quaternion.identity;
 		}
+		*/
 	}
 
-    protected float GetHitZoneBeginning(int stringIndex)   // 不同弦上的音符開始可以被打到的位置不同
+	protected float GetHitZoneBeginning(int stringIndex)   // 不同弦上的音符開始可以被打到的位置不同
 	{
         switch (stringIndex)
         {
 			case 0:   
-				return -0.5f;
+				return NoteEnd1.position.z;
 			case 1:   
-				return -0.5f;
+				return NoteEnd2.position.z;
 			case 2:   
-				return -0.5f;
+				return NoteEnd3.position.z;
 			case 3:   
-				return -0.5f;
+				return NoteEnd4.position.z;
 			case 4:   
-				return -0.5f;
+				return NoteEnd5.position.z;
 			case 5:   
-				return -0.5f;
+				return NoteEnd6.position.z;
 			case 6:   
-				return -0.5f;
+				return NoteEnd7.position.z;
 			default:    //預設值，推測用不到，寫保險的
 				return -0.5f;
 		}	
