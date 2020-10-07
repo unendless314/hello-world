@@ -66,7 +66,7 @@ public class DrumGameplay : MonoBehaviour
                 else
                 {
 					//沒有播音樂，且選取打勾，且秒數為 0，表示重新開始播放
-					GetComponent<DrumGameplay>().StartPlaying((ChooseSongNumber - 1));  //要第幾首歌就是從這裡傳
+					GetComponent<DrumGameplay>().StartPlaying((ChooseSongNumber));  //要第幾首歌就是從這裡傳
 				}
 			}
 		}
