@@ -110,6 +110,7 @@ public class RunPlayer : MonoBehaviour
 	{
 		SongFinished = false; // 按下播放鈕，表示歌曲還沒播完
 		IsSongPlaying = true;
+		movPlayer.Play();	//影片開始播放
 
 		if (SmoothAudioTime < 0)    //負的秒數超過 offset 秒數的話，遊戲會直接開始
 		{
@@ -131,12 +132,17 @@ public class RunPlayer : MonoBehaviour
 
 		public void Pause()
 	{
+		movPlayer.Pause();  //影片暫停
 		IsSongPlaying = false;
 		SongFinished = false;
 	}
 
 	public void Stop()
 	{
+		movPlayer.Stop();   //影片停止
+		movPlayer.time = 0;	//影片時間軸歸零
+		SmoothAudioTime = 0;    //畫面時間軸歸零
+
 		WasPlaying = false;
 		IsSongPlaying = false;
 		SongFinished = true;
