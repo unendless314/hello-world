@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class SonataPlayer : MonoBehaviour
@@ -93,7 +93,7 @@ public class SonataPlayer : MonoBehaviour
 		}
 		else
 		{
-			GetComponent<AudioSource>().Play();
+			GetComponent<AudioSource>().Play();	//轉換 MOV 必須關掉
 			SmoothAudioTime = GetComponent<AudioSource>().time;
 		}
 	}
@@ -102,7 +102,7 @@ public class SonataPlayer : MonoBehaviour
 	{
 		yield return new WaitForSeconds(delay);
 
-		GetComponent<AudioSource>().Play();
+		GetComponent<AudioSource>().Play(); //轉換 MOV 必須關掉
 	}
 
 	public void Pause()
