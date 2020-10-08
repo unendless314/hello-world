@@ -107,7 +107,7 @@ public class DrumGameplay : MonoBehaviour
 			GameObject note = InstantiateNoteFromPrefab(Player.Song.Notes[i].StringIndex);
 
 				//Hide object on start, they will be shown - when appropriate - in the UpdateNotes routine
-				note.GetComponent<Renderer>().enabled = false;
+				//note.GetComponent<Renderer>().enabled = false;
 
 #if UNITY_4_0
 				note.SetActive( false );
@@ -145,15 +145,22 @@ public class DrumGameplay : MonoBehaviour
 
 	protected void HideNote(int index)  //把音符隱藏起來
 	{
-		NoteObjects[index].GetComponent<Renderer>().enabled = false;
+		GameObject NoteChild = NoteObjects[index].transform.GetChild(0).gameObject;
+		NoteChild.GetComponent<Renderer>().enabled = false;
+		//NoteObjects[index].GetComponent<Renderer>().enabled = false;
+
+
+		//NoteObjects[index].transform.GetChild(0).gameObject.GetComponent<Renderer>().enabled = false;
+
 	}
 
 	protected bool IsNoteHit(int index)
 	{
 		Note note = Player.Song.Notes[index];
+		GameObject NoteChild = NoteObjects[index].transform.GetChild(0).gameObject;
 
 		//When the renderer is disabled, this note was already hit before
-		if (NoteObjects[index].GetComponent<Renderer>().enabled == false)   //被打過的音符不能再被打中
+		if (NoteChild.GetComponent<Renderer>().enabled == false)   //被打過的音符不能再被打中
 		{
 			return false;
 		}
@@ -172,6 +179,8 @@ public class DrumGameplay : MonoBehaviour
 	protected bool WasNoteMissed(int index) //看懂
 	{
 		Note note = Player.Song.Notes[index];
+		GameObject NoteChild = NoteObjects[index].transform.GetChild(0).gameObject; ;
+
 		int stringIndex = note.StringIndex; 
 
 		if (IsInHitZone(index)) //如果音符在可打擊範圍內
@@ -186,7 +195,7 @@ public class DrumGameplay : MonoBehaviour
 		}
 
 		//If the renderer is disabled, this note was hit
-		if (NoteObjects[index].GetComponent<Renderer>().enabled == false)
+		if (NoteChild.GetComponent<Renderer>().enabled == false)
 		{
 			return false;
 		}
@@ -197,6 +206,8 @@ public class DrumGameplay : MonoBehaviour
 	protected void UpdateNotePosition(int index)
 	{
 		Note note = Player.Song.Notes[index];
+		GameObject NoteChild = NoteObjects[index].transform.GetChild(0).gameObject;
+		
 		
 		//If the note is farther away then 6 beats, its not visible on the neck and we dont have to update it
 		if (note.Time < Player.GetCurrentBeat() + 6)    //該音符的節拍屬性比目前播放中的節拍進度慢超過6拍時，就不再顯示音符
@@ -214,7 +225,7 @@ public class DrumGameplay : MonoBehaviour
 #else
 				NoteObjects[index].SetActive (true); //可以改成activeSelf
 #endif
-				NoteObjects[index].GetComponent<Renderer>().enabled = true;
+				NoteChild.GetComponent<Renderer>().enabled = true;
 
 			}
 
@@ -308,7 +319,10 @@ public class DrumGameplay : MonoBehaviour
 									 , GetStartPosition(stringIndex)
 									 , GetStartRotation(stringIndex)
 									 );
-		
+
+		GameObject NoteChild = note.transform.GetChild(0).gameObject;
+		NoteChild.GetComponent<Renderer>().enabled = true;
+
 		//note.GetComponent<Renderer>().material.color = Colors[stringIndex];   //音符不需要上顏色
 
 		return note;
