@@ -19,15 +19,22 @@ public class RunPlayer : MonoBehaviour
 
 	void Start()
 	{
-		movPlayer = GameObject.Find("Mov").GetComponent<VideoPlayer>();
+		//movPlayer = GameObject.Find("Mov").GetComponent<VideoPlayer>();
 
-		videoTime = (float)movPlayer.time;
-		videoLength = (float)movPlayer.clip.length;
+		//videoTime = (float)movPlayer.time;
+		//videoLength = (float)movPlayer.clip.length;
 	}
 
 	void Update()
 	{
-		videoTime = (float)movPlayer.time;
+        try
+        {
+			videoTime = (float)movPlayer.time;
+		}
+        catch (System.Exception ex)
+        {
+			videoTime = 1111;
+		}
 
 		if (IsPlaying())
 		{
@@ -41,6 +48,7 @@ public class RunPlayer : MonoBehaviour
 
 	protected void OnSongStopped()
 	{
+		movPlayer = GameObject.Find("Mov").GetComponent<VideoPlayer>();
 		if (!movPlayer.clip)
 		{
 
@@ -110,6 +118,7 @@ public class RunPlayer : MonoBehaviour
 
 	public void Play()  //不算很懂
 	{
+		movPlayer = GameObject.Find("Mov").GetComponent<VideoPlayer>();
 		SongFinished = false; // 按下播放鈕，表示歌曲還沒播完
 		IsSongPlaying = true;
 		videoTime = (float)movPlayer.time;
@@ -137,6 +146,7 @@ public class RunPlayer : MonoBehaviour
 
 		public void Pause()
 	{
+		movPlayer = GameObject.Find("Mov").GetComponent<VideoPlayer>();
 		movPlayer.Pause();  //影片暫停
 		IsSongPlaying = false;
 		SongFinished = false;
@@ -144,6 +154,7 @@ public class RunPlayer : MonoBehaviour
 
 	public void Stop()
 	{
+		movPlayer = GameObject.Find("Mov").GetComponent<VideoPlayer>();
 		movPlayer.Stop();   //影片停止
 		movPlayer.time = 0;	//影片時間軸歸零
 		SmoothAudioTime = 0;    //畫面時間軸歸零
