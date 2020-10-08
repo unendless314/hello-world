@@ -12,6 +12,7 @@ public class DrumGameplay : MonoBehaviour
 	public int ChooseSongNumber;
 	public bool PlayAndPause;
 	public bool StopSong;
+	//protected Color[] Colors;   //音符不需要上顏色
 
 	/* 似乎沒用到?
 	//public bool[] StringHasNote = new bool[7];
@@ -20,18 +21,20 @@ public class DrumGameplay : MonoBehaviour
 	*/
 
 	//References to important objects or components
-    protected RunPlayer Player;	//測試期間常常要改
+	protected RunPlayer Player;	//測試期間常常要改
 	protected List<GameObject> NoteObjects;
-	protected Color[] Colors;   //了解
+
 
 	//Use this for initialization
 	void Start()
 	{
 		//Init references to external objects/components
-	
+
 		Player = GameObject.Find("SheetsManager").GetComponent<RunPlayer>();
 
 		NoteObjects = new List<GameObject>();   //音符物件
+
+		/*	音符不需要上顏色
 		Colors = new Color[7];
 
 		Colors[0] = new Color(0, 1, 1, 1);
@@ -41,6 +44,7 @@ public class DrumGameplay : MonoBehaviour
 		Colors[4] = new Color(1, 0, 0, 1);
 		Colors[5] = new Color(1, 0.92f, 0.016f, 1);
 		Colors[6] = new Color(0.5f, 0.5f, 0.5f, 1);
+		*/
 
 		PlayAndPause = false;
 		StopSong = false;
@@ -176,7 +180,7 @@ public class DrumGameplay : MonoBehaviour
 		}
 
 		//If position.z is greater than 0, this note can still be hit
-		if (NoteObjects[index].transform.position.z > (GetHitZoneEnd(stringIndex)-0))  //卡的距離比 GetHitZoneEnd() 多一些些
+		if (NoteObjects[index].transform.position.z > (GetHitZoneEnd(stringIndex)))  //卡的距離比 GetHitZoneEnd() 多一些些
 		{
 			return false;
 		}
@@ -305,7 +309,7 @@ public class DrumGameplay : MonoBehaviour
 									 , GetStartRotation(stringIndex)
 									 );
 		
-		note.GetComponent<Renderer>().material.color = Colors[stringIndex];   //預設音符為白色，上弦前要改顏色
+		//note.GetComponent<Renderer>().material.color = Colors[stringIndex];   //音符不需要上顏色
 
 		return note;
 	}
@@ -388,19 +392,19 @@ public class DrumGameplay : MonoBehaviour
         switch (stringIndex)
         {
 			case 0:   
-				return NoteEnd1.position.z;
+				return -0.5f;
 			case 1:   
-				return NoteEnd2.position.z;
+				return -0.5f;
 			case 2:   
-				return NoteEnd3.position.z;
+				return -0.5f;
 			case 3:   
-				return NoteEnd4.position.z;
+				return -0.5f;
 			case 4:   
-				return NoteEnd5.position.z;
+				return -0.5f;
 			case 5:   
-				return NoteEnd6.position.z;
+				return -0.5f;
 			case 6:   
-				return NoteEnd7.position.z;
+				return -0.5f;
 			default:    //預設值，推測用不到，寫保險的
 				return -0.5f;
 		}	
@@ -411,19 +415,19 @@ public class DrumGameplay : MonoBehaviour
 		switch (stringIndex)
 		{
 			case 0:  
-				return -1.5f;
+				return NoteEnd1.position.z;
 			case 1:   
-				return -1.1f;
+				return NoteEnd2.position.z;
 			case 2:  
-				return -1.4f;
+				return NoteEnd3.position.z;
 			case 3:   
-				return -1.2f;
+				return NoteEnd4.position.z;
 			case 4:  
-				return -1.2f;
+				return NoteEnd5.position.z;
 			case 5:   
-				return -1.4f;
+				return NoteEnd6.position.z;
 			case 6:   
-				return -1.4f;
+				return NoteEnd7.position.z;
 			default:    
 				return -2f;
 		}
