@@ -11,7 +11,7 @@ public class SongDataEditor : Editor
 	private static Texture2D _coloredLineTexture;
 	private static Color _coloredLineColor;
 
-	private GameObject NoSoundMusic;
+	private GameObject SheetsManager;
 	private AudioSource MetronomeSource;
 	private SonataPlayer SonataPlayer;
 
@@ -52,15 +52,15 @@ public class SongDataEditor : Editor
 	protected void OnEnable()   //作者弄好好了，抓出遊戲物件中的節拍器，不用改
 	{
 		//Setup object references
-		NoSoundMusic = GameObject.Find("NoSoundMusic");     //測試期間這邊要常常改
+		SheetsManager = GameObject.Find("SheetsManager");     //測試期間這邊要常常改
 																	  
 
-		if (NoSoundMusic == null)
+		if (SheetsManager == null)
 		{
 			return;
 		}
 
-		SonataPlayer = NoSoundMusic.GetComponent<SonataPlayer>();
+		SonataPlayer = SheetsManager.GetComponent<SonataPlayer>();
 		MetronomeSource = GameObject.Find("Metronome").GetComponent<AudioSource>();
 
 		//Prepare playback
@@ -192,18 +192,18 @@ public class SongDataEditor : Editor
 		{
 			case KeyCode.UpArrow:
 				//Up arrow advances the song by one beat
-				NoSoundMusic.GetComponent<AudioSource>().time += BeatsToSeconds(1f, SonataPlayer.Song.BeatsPerMinute);
+				SheetsManager.GetComponent<AudioSource>().time += BeatsToSeconds(1f, SonataPlayer.Song.BeatsPerMinute);
 				e.Use();
 				break;
 			case KeyCode.DownArrow:
 				//Down arrow rewinds the song by one beat
-				if (NoSoundMusic.GetComponent<AudioSource>().time >= BeatsToSeconds(1f, SonataPlayer.Song.BeatsPerMinute))
+				if (SheetsManager.GetComponent<AudioSource>().time >= BeatsToSeconds(1f, SonataPlayer.Song.BeatsPerMinute))
 				{
-					NoSoundMusic.GetComponent<AudioSource>().time -= BeatsToSeconds(1f, SonataPlayer.Song.BeatsPerMinute);
+					SheetsManager.GetComponent<AudioSource>().time -= BeatsToSeconds(1f, SonataPlayer.Song.BeatsPerMinute);
 				}
 				else
 				{
-					NoSoundMusic.GetComponent<AudioSource>().time = 0;
+					SheetsManager.GetComponent<AudioSource>().time = 0;
 				}
 
 				e.Use();
@@ -314,9 +314,9 @@ public class SongDataEditor : Editor
 
 	protected void DrawInspector()
 	{
-		if (NoSoundMusic == null)
+		if (SheetsManager == null)
 		{
-			WarningBox("Mov Object could not be found.");
+			WarningBox("SheetsManager Object could not be found.");
 			WarningBox("Did you load the GuitarUnity scene?");
 			return;
 		}
@@ -463,7 +463,7 @@ public class SongDataEditor : Editor
 		GUILayout.Space(15);
 		GUILayout.Label("Playback Speed", EditorStyles.label);
 		//MovObject.GetComponent<VideoPlayer>().GetComponent<AudioSource>().pitch = GUILayout.HorizontalSlider(MovObject.GetComponent<VideoPlayer>().GetComponent<AudioSource>().pitch, 0, 1);
-		NoSoundMusic.GetComponent<AudioSource>().pitch = GUILayout.HorizontalSlider(NoSoundMusic.GetComponent<AudioSource>().pitch, 0, 1);
+		SheetsManager.GetComponent<AudioSource>().pitch = GUILayout.HorizontalSlider(SheetsManager.GetComponent<AudioSource>().pitch, 0, 1);
 		EditorGUILayout.EndHorizontal();
 
 		//Draw Use Metronome toggle
@@ -551,12 +551,12 @@ public class SongDataEditor : Editor
 
 	protected bool IsPlaying()
 	{
-		if (NoSoundMusic == null)
+		if (SheetsManager == null)
 		{
 			return false;
 		}
 
-		return NoSoundMusic.GetComponent<AudioSource>().isPlaying;
+		return SheetsManager.GetComponent<AudioSource>().isPlaying;
 	}
 
 	protected void DrawMainView()
@@ -804,9 +804,9 @@ public class SongDataEditor : Editor
 		Rect rect = GetProgressViewRect();
 
 		float previewProgress = 0f;
-		if (NoSoundMusic && NoSoundMusic.GetComponent<AudioSource>().clip)
+		if (SheetsManager && SheetsManager.GetComponent<AudioSource>().clip)
 		{
-			previewProgress = NoSoundMusic.GetComponent<AudioSource>().time / NoSoundMusic.GetComponent<AudioSource>().clip.length;
+			previewProgress = SheetsManager.GetComponent<AudioSource>().time / SheetsManager.GetComponent<AudioSource>().clip.length;
 		}
 
 		float previewProgressTop = rect.yMin + rect.height * (1 - previewProgress);
@@ -845,7 +845,7 @@ public class SongDataEditor : Editor
 	{
 		float progress = 1 - (float)(mousePosition.y - SongViewRect.yMin) / SongViewRect.height;
 
-		NoSoundMusic.GetComponent<AudioSource>().time = NoSoundMusic.GetComponent<AudioSource>().clip.length * progress;
+		SheetsManager.GetComponent<AudioSource>().time = SheetsManager.GetComponent<AudioSource>().clip.length * progress;
 	}
 
 	protected void OnPlayPauseClicked() //如果編輯器中按下了 Play Song
@@ -854,26 +854,26 @@ public class SongDataEditor : Editor
 
 		if (IsPlaying())
 		{
-			NoSoundMusic.GetComponent<AudioSource>().Pause();   //播放中按 Play 反而會暫停
+			SheetsManager.GetComponent<AudioSource>().Pause();   //播放中按 Play 反而會暫停
 			EditorUtility.SetDirty(target);
 		}
 		else
 		{
-			NoSoundMusic.GetComponent<AudioSource>().Play();
-			NoSoundMusic.GetComponent<AudioSource>().Pause();
-			NoSoundMusic.GetComponent<AudioSource>().Play();
+			SheetsManager.GetComponent<AudioSource>().Play();
+			SheetsManager.GetComponent<AudioSource>().Pause();
+			SheetsManager.GetComponent<AudioSource>().Play();
 		}
 	}
 
 	protected void OnStopClicked()  //如果編輯器中按下了 Stop Song
 	{
-		if (!NoSoundMusic)
+		if (!SheetsManager)
 		{
 			return;
 		}
 
-		NoSoundMusic.GetComponent<AudioSource>().Stop();    //音檔停止
-		NoSoundMusic.GetComponent<AudioSource>().time = 0f; //回溯到 0 拍
+		SheetsManager.GetComponent<AudioSource>().Stop();    //音檔停止
+		SheetsManager.GetComponent<AudioSource>().time = 0f; //回溯到 0 拍
 		LastMetronomeBeat = -Mathf.Ceil(SonataPlayer.Song.AudioStartBeatOffset);
 		EditorUtility.SetDirty(target);
 	}
