@@ -14,12 +14,6 @@ public class DrumGameplay : MonoBehaviour
 	public bool StopSong;
 	//protected Color[] Colors;   //音符不需要上顏色
 
-	/* 似乎沒用到?
-	//public bool[] StringHasNote = new bool[7];
-
-	//public bool[] drumStringIndex = new bool[7];
-	*/
-
 	//References to important objects or components
 	protected RunPlayer Player;	//測試期間常常要改
 	protected List<GameObject> NoteObjects;
@@ -197,7 +191,7 @@ public class DrumGameplay : MonoBehaviour
 		//If the renderer is disabled, this note was hit
 		if (NoteChild.GetComponent<Renderer>().enabled == false)
 		{
-			return false;
+			return true;	//看位置就是從這裡看
 		}
 
 		return true;
@@ -207,10 +201,11 @@ public class DrumGameplay : MonoBehaviour
 	{
 		Note note = Player.Song.Notes[index];
 		GameObject NoteChild = NoteObjects[index].transform.GetChild(0).gameObject;
-		
-		
+		float noteTime = note.Time;
+		float playerBeat = Player.GetCurrentBeat();
+
 		//If the note is farther away then 6 beats, its not visible on the neck and we dont have to update it
-		if (note.Time < Player.GetCurrentBeat() + 6)    //該音符的節拍屬性比目前播放中的節拍進度慢超過6拍時，就不再顯示音符
+		if (noteTime < playerBeat + 6)    //該音符的節拍屬性比目前播放中的節拍進度慢超過6拍時，就不再顯示音符
 		{
 			//If the note is not active, it is visible on the neck for the first time
 #if UNITY_4_0
@@ -229,15 +224,16 @@ public class DrumGameplay : MonoBehaviour
 
 			}
 
-			//Calculate how far the note has progressed on the neck
-			float progress = (note.Time - Player.GetCurrentBeat() - 1f) / 6f;   //吉他遊戲是差 0.5 拍，我改成差 1 拍
-																				//這裡面的參數是特別調整過的，更改的話視覺效果會很怪異
+			if(noteTime < playerBeat - 1)	//播放器的時間已經超過音符時間 1 拍時，不再更新音符位置
+            {
+				return;
+            }
 
+			//Calculate how far the note has progressed on the neck
+			float progress = (noteTime - playerBeat - 1f) / 6f;   //吉他遊戲是差 0.5 拍，我改成差 1 拍
+																  //這裡面的參數是特別調整過的，更改的話視覺效果會很怪異
 			//Update its position
 			Vector3 position = NoteObjects[index].transform.position;
-
-			//float xposition = NoteObjects[index].transform.position.x;
-			//position.x = GetXCoordinate(xposition);
 
 			position.y = progress * GetYDisplacement() + GetYOffset(Player.Song.Notes[index].StringIndex);	//
 			position.z = progress * GetZDisplacement() + GetZOffset(Player.Song.Notes[index].StringIndex);  //
