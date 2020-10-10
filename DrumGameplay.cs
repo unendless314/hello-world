@@ -12,26 +12,23 @@ public class DrumGameplay : MonoBehaviour
 	public int ChooseSongNumber;
 	public bool PlayAndPause;
 	public bool StopSong;
-
-	/* 似乎沒用到?
-	//public bool[] StringHasNote = new bool[7];
-
-	//public bool[] drumStringIndex = new bool[7];
-	*/
+	//protected Color[] Colors;   //音符不需要上顏色
 
 	//References to important objects or components
-    protected RunPlayer Player;	//測試期間常常要改
+	protected RunPlayer Player;	//測試期間常常要改
 	protected List<GameObject> NoteObjects;
-	protected Color[] Colors;   //了解
+
 
 	//Use this for initialization
 	void Start()
 	{
 		//Init references to external objects/components
-	
+
 		Player = GameObject.Find("SheetsManager").GetComponent<RunPlayer>();
 
 		NoteObjects = new List<GameObject>();   //音符物件
+
+		/*	音符不需要上顏色
 		Colors = new Color[7];
 
 		Colors[0] = new Color(0, 1, 1, 1);
@@ -41,6 +38,7 @@ public class DrumGameplay : MonoBehaviour
 		Colors[4] = new Color(1, 0, 0, 1);
 		Colors[5] = new Color(1, 0.92f, 0.016f, 1);
 		Colors[6] = new Color(0.5f, 0.5f, 0.5f, 1);
+		*/
 
 		PlayAndPause = false;
 		StopSong = false;
@@ -103,7 +101,7 @@ public class DrumGameplay : MonoBehaviour
 			GameObject note = InstantiateNoteFromPrefab(Player.Song.Notes[i].StringIndex);
 
 				//Hide object on start, they will be shown - when appropriate - in the UpdateNotes routine
-				note.GetComponent<Renderer>().enabled = false;
+				//note.GetComponent<Renderer>().enabled = false;
 
 #if UNITY_4_0
 				note.SetActive( false );
@@ -141,15 +139,22 @@ public class DrumGameplay : MonoBehaviour
 
 	protected void HideNote(int index)  //把音符隱藏起來
 	{
-		NoteObjects[index].GetComponent<Renderer>().enabled = false;
+		GameObject NoteChild = NoteObjects[index].transform.GetChild(0).gameObject;
+		NoteChild.GetComponent<Renderer>().enabled = false;
+		//NoteObjects[index].GetComponent<Renderer>().enabled = false;
+
+
+		//NoteObjects[index].transform.GetChild(0).gameObject.GetComponent<Renderer>().enabled = false;
+
 	}
 
 	protected bool IsNoteHit(int index)
 	{
 		Note note = Player.Song.Notes[index];
+		GameObject NoteChild = NoteObjects[index].transform.GetChild(0).gameObject;
 
 		//When the renderer is disabled, this note was already hit before
-		if (NoteObjects[index].GetComponent<Renderer>().enabled == false)   //被打過的音符不能再被打中
+		if (NoteChild.GetComponent<Renderer>().enabled == false)   //被打過的音符不能再被打中
 		{
 			return false;
 		}
@@ -168,6 +173,8 @@ public class DrumGameplay : MonoBehaviour
 	protected bool WasNoteMissed(int index) //看懂
 	{
 		Note note = Player.Song.Notes[index];
+		GameObject NoteChild = NoteObjects[index].transform.GetChild(0).gameObject; ;
+
 		int stringIndex = note.StringIndex; 
 
 		if (IsInHitZone(index)) //如果音符在可打擊範圍內
@@ -176,15 +183,15 @@ public class DrumGameplay : MonoBehaviour
 		}
 
 		//If position.z is greater than 0, this note can still be hit
-		if (NoteObjects[index].transform.position.z > (GetHitZoneEnd(stringIndex)-0))  //卡的距離比 GetHitZoneEnd() 多一些些
+		if (NoteObjects[index].transform.position.z > (GetHitZoneEnd(stringIndex)))  //卡的距離比 GetHitZoneEnd() 多一些些
 		{
 			return false;
 		}
 
 		//If the renderer is disabled, this note was hit
-		if (NoteObjects[index].GetComponent<Renderer>().enabled == false)
+		if (NoteChild.GetComponent<Renderer>().enabled == false)
 		{
-			return false;
+			return true;	//看位置就是從這裡看
 		}
 
 		return true;
@@ -193,9 +200,12 @@ public class DrumGameplay : MonoBehaviour
 	protected void UpdateNotePosition(int index)
 	{
 		Note note = Player.Song.Notes[index];
-		
+		GameObject NoteChild = NoteObjects[index].transform.GetChild(0).gameObject;
+		float noteTime = note.Time;
+		float playerBeat = Player.GetCurrentBeat();
+
 		//If the note is farther away then 6 beats, its not visible on the neck and we dont have to update it
-		if (note.Time < Player.GetCurrentBeat() + 6)    //該音符的節拍屬性比目前播放中的節拍進度慢超過6拍時，就不再顯示音符
+		if (noteTime < playerBeat + 6)    //該音符的節拍屬性比目前播放中的節拍進度慢超過6拍時，就不再顯示音符
 		{
 			//If the note is not active, it is visible on the neck for the first time
 #if UNITY_4_0
@@ -210,19 +220,20 @@ public class DrumGameplay : MonoBehaviour
 #else
 				NoteObjects[index].SetActive (true); //可以改成activeSelf
 #endif
-				NoteObjects[index].GetComponent<Renderer>().enabled = true;
+				NoteChild.GetComponent<Renderer>().enabled = true;
 
 			}
 
-			//Calculate how far the note has progressed on the neck
-			float progress = (note.Time - Player.GetCurrentBeat() - 1f) / 6f;   //吉他遊戲是差 0.5 拍，我改成差 1 拍
-																				//這裡面的參數是特別調整過的，更改的話視覺效果會很怪異
+			if(noteTime < playerBeat - 1)	//播放器的時間已經超過音符時間 1 拍時，不再更新音符位置
+            {
+				return;
+            }
 
+			//Calculate how far the note has progressed on the neck
+			float progress = (noteTime - playerBeat - 1f) / 6f;   //吉他遊戲是差 0.5 拍，我改成差 1 拍
+																  //這裡面的參數是特別調整過的，更改的話視覺效果會很怪異
 			//Update its position
 			Vector3 position = NoteObjects[index].transform.position;
-
-			//float xposition = NoteObjects[index].transform.position.x;
-			//position.x = GetXCoordinate(xposition);
 
 			position.y = progress * GetYDisplacement() + GetYOffset(Player.Song.Notes[index].StringIndex);	//
 			position.z = progress * GetZDisplacement() + GetZOffset(Player.Song.Notes[index].StringIndex);  //
@@ -304,8 +315,11 @@ public class DrumGameplay : MonoBehaviour
 									 , GetStartPosition(stringIndex)
 									 , GetStartRotation(stringIndex)
 									 );
-		
-		note.GetComponent<Renderer>().material.color = Colors[stringIndex];   //預設音符為白色，上弦前要改顏色
+
+		GameObject NoteChild = note.transform.GetChild(0).gameObject;
+		NoteChild.GetComponent<Renderer>().enabled = true;
+
+		//note.GetComponent<Renderer>().material.color = Colors[stringIndex];   //音符不需要上顏色
 
 		return note;
 	}
@@ -388,19 +402,19 @@ public class DrumGameplay : MonoBehaviour
         switch (stringIndex)
         {
 			case 0:   
-				return NoteEnd1.position.z;
+				return -0.5f;
 			case 1:   
-				return NoteEnd2.position.z;
+				return -0.5f;
 			case 2:   
-				return NoteEnd3.position.z;
+				return -0.5f;
 			case 3:   
-				return NoteEnd4.position.z;
+				return -0.5f;
 			case 4:   
-				return NoteEnd5.position.z;
+				return -0.5f;
 			case 5:   
-				return NoteEnd6.position.z;
+				return -0.5f;
 			case 6:   
-				return NoteEnd7.position.z;
+				return -0.5f;
 			default:    //預設值，推測用不到，寫保險的
 				return -0.5f;
 		}	
@@ -411,19 +425,19 @@ public class DrumGameplay : MonoBehaviour
 		switch (stringIndex)
 		{
 			case 0:  
-				return -1.5f;
+				return NoteEnd1.position.z;
 			case 1:   
-				return -1.1f;
+				return NoteEnd2.position.z;
 			case 2:  
-				return -1.4f;
+				return NoteEnd3.position.z;
 			case 3:   
-				return -1.2f;
+				return NoteEnd4.position.z;
 			case 4:  
-				return -1.2f;
+				return NoteEnd5.position.z;
 			case 5:   
-				return -1.4f;
+				return NoteEnd6.position.z;
 			case 6:   
-				return -1.4f;
+				return NoteEnd7.position.z;
 			default:    
 				return -2f;
 		}
