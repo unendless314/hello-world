@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.Video;
+using System;
 
 public class RunPlayer : MonoBehaviour
 {
@@ -14,15 +15,14 @@ public class RunPlayer : MonoBehaviour
 
 	protected VideoPlayer movPlayer;
 	public float videoTime;
-	public float videoLength;
+	public float videoLength = 0;
 	public float showSAT;
 
 	void Start()
 	{
-		//movPlayer = GameObject.Find("Mov").GetComponent<VideoPlayer>();
-
-		//videoTime = (float)movPlayer.time;
-		//videoLength = (float)movPlayer.clip.length;
+		movPlayer = GameObject.Find("Mov").GetComponent<VideoPlayer>();
+		videoTime = (float)movPlayer.time;
+		//videoLength = (float)movPlayer.clip.length;	//影片時間長度改為事先設定，不再讀取檔案長度
 	}
 
 	void Update()
@@ -36,6 +36,7 @@ public class RunPlayer : MonoBehaviour
 			videoTime = 1111;
 		}
 
+
 		if (IsPlaying())
 		{
 			AudioStopEventFired = false;
@@ -48,7 +49,7 @@ public class RunPlayer : MonoBehaviour
 
 	protected void OnSongStopped()
 	{
-		movPlayer = GameObject.Find("Mov").GetComponent<VideoPlayer>();
+		
 		if (!movPlayer.clip)
 		{
 
@@ -108,7 +109,7 @@ public class RunPlayer : MonoBehaviour
 		}
 
 		//Check if my smooth time and the actual audio time are of by 0.1
-		return Mathf.Abs(SmoothAudioTime - videoTime) > 0.05f;    //想玩慢動作版的話，畫面修正秒數一定要縮短，不然畫面回溯超可怕，但是會加倍運算量
+		return Mathf.Abs(SmoothAudioTime - videoTime) > 0.1f;    //想玩慢動作版的話，畫面修正秒數一定要縮短，不然畫面回溯超可怕，但是會加倍運算量
 	}
 
 	protected void CorrectSmoothAudioTime() //強制讓畫面播放秒數與音檔播放秒數相等
@@ -118,13 +119,13 @@ public class RunPlayer : MonoBehaviour
 
 	public void Play()  //不算很懂
 	{
-		movPlayer = GameObject.Find("Mov").GetComponent<VideoPlayer>();
+		
 		SongFinished = false; // 按下播放鈕，表示歌曲還沒播完
 		IsSongPlaying = true;
 		videoTime = (float)movPlayer.time;
-		videoLength = (float)movPlayer.clip.length;
+		//videoLength = (float)movPlayer.clip.length;	//影片時間長度改為事先設定，不再讀取檔案長度
 
-		movPlayer.Play();	//影片開始播放
+		//movPlayer.Play();	//影片不播放
 
 		if (SmoothAudioTime < 0)    //負的秒數超過 offset 秒數的話，遊戲會直接開始
 		{
@@ -144,9 +145,8 @@ public class RunPlayer : MonoBehaviour
 	}
 	*/
 
-		public void Pause()
+	public void Pause()
 	{
-		movPlayer = GameObject.Find("Mov").GetComponent<VideoPlayer>();
 		movPlayer.Pause();  //影片暫停
 		IsSongPlaying = false;
 		SongFinished = false;
@@ -154,7 +154,7 @@ public class RunPlayer : MonoBehaviour
 
 	public void Stop()
 	{
-		movPlayer = GameObject.Find("Mov").GetComponent<VideoPlayer>();
+		
 		movPlayer.Stop();   //影片停止
 		movPlayer.time = 0;	//影片時間軸歸零
 		SmoothAudioTime = 0;    //畫面時間軸歸零
@@ -184,4 +184,6 @@ public class RunPlayer : MonoBehaviour
     {
 		return SmoothAudioTime;
 	}
+
+
 }
