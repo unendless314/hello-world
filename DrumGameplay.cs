@@ -75,11 +75,19 @@ public class DrumGameplay : MonoBehaviour
 		{
 			Player.Stop();
 
-            for (int i = 0; i < Player.Song.Notes.Count; i++)
+            try
             {
-				Destroy(NoteObjects[i]);
+				for (int i = 0; i < Player.Song.Notes.Count; i++)	//音符物件只刪除一次，之後都顯示 Debug 訊息
+				{
+					Destroy(NoteObjects[i]);
+				}
+				NoteObjects.Clear();
+
 			}
-			NoteObjects.Clear();
+            catch (Exception ex)
+            {
+				Debug.Log("音符物件已刪除");
+            }
 		}
 	}
 
