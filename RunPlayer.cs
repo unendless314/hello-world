@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEngine.Video;
 using System;
@@ -155,7 +155,7 @@ public class RunPlayer : MonoBehaviour
 	public void Stop()
 	{
 		
-		movPlayer.Stop();   //影片停止
+		//movPlayer.Stop();   //影片不停止
 		movPlayer.time = 0;	//影片時間軸歸零
 		SmoothAudioTime = 0;    //畫面時間軸歸零
 
