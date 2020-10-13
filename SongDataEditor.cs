@@ -20,7 +20,7 @@ public class SongDataEditor : Editor
 	//ProgressBar, or Progress View is the small preview on the right, where you can navigate through the song
 	private Rect SongViewRect;
 	private float SongViewProgressBarWidth = 30f;   //右邊進度條寬度(預設20)
-	private float SongViewHeight = 400f;    //左邊主編輯器寬度
+	private float SongViewHeight = 800f;    //左邊主編輯器寬度要拉長，才有辦法看 16 分音符
 
 	//Metronome Vars
 	private static bool UseMetronome;
