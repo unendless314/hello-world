@@ -20,7 +20,7 @@ public class SongDataEditor : Editor
 	//ProgressBar, or Progress View is the small preview on the right, where you can navigate through the song
 	private Rect SongViewRect;
 	private float SongViewProgressBarWidth = 30f;   //右邊進度條寬度(預設20)
-	private float SongViewHeight = 800f;    //左邊主編輯器寬度要拉長，才有辦法看 16 分音符
+	private float SongViewHeight = 400f;    //左邊主編輯器寬度要拉長，才有辦法看 16 分音符
 
 	//Metronome Vars
 	private static bool UseMetronome;
@@ -105,7 +105,7 @@ public class SongDataEditor : Editor
 
 			//Which color does this string have?
 			//Color color = GuitarObject.GetComponent<GuitarGameplay>().GetColor(stringIndex);	//顏色先不管，暫時換成一樣!!!
-			Color color = new Color(0f, 1f, 1f, 1f);
+			Color color = new Color(0f, 1f, 0, 1f);
 
 			//Calculate position of the note
 			int y = (int)Mathf.Round(((SonataPlayer.Song.Notes[i].Time + SonataPlayer.Song.AudioStartBeatOffset - 1) / totalBeats) * height);
@@ -115,9 +115,9 @@ public class SongDataEditor : Editor
 			float length = SonataPlayer.Song.Notes[i].Length;
 
 			//Draw 3x3 pixel rectangle	//畫 3*3 點陣圖
-			for (int j = -1; j < 2; ++j)
+			for (int j = -1; j < 2; ++j)    //j = -1; j < 2
 			{
-				for (int k = -1; k < 2; ++k)
+				for (int k = -1; k < 2; ++k)    //k = -1; k < 2
 				{
 					ProgressViewTexture.SetPixel(x + j, y + k, color);
 				}
@@ -277,7 +277,7 @@ public class SongDataEditor : Editor
 
 	void AddNewNoteAtCurrentTime(int stringIndex)
 	{
-		float currentBeat = Mathf.Round((SonataPlayer.GetCurrentBeat(true) + 1) * 4) / 4;
+		float currentBeat = Mathf.Round((SonataPlayer.GetCurrentBeat(true) + 1) * 4) / 4; //需要 16 分音符，原本都是 4 分音符
 
 		Note note = SonataPlayer.Song.Notes.Find(item => item.Time == currentBeat && item.StringIndex == stringIndex);
 
@@ -670,7 +670,7 @@ public class SongDataEditor : Editor
 		float heightOfOneBeat = SongViewRect.height / 6f;
 		float totalWidth = SongViewRect.width - SongViewProgressBarWidth;
 		float stringDistance = totalWidth / 8;  //這裡一定要改成 8(6)，但是只有改背景而已滑鼠 onclick 會錯位
-		float numNotesPerBeat = 4f;
+		float numNotesPerBeat = 4f; //需要 16 分音符，原本都是 4 分音符
 
 		//Calculate the offset (from 0 to 1) how far the current beat has progressed
 		float beatOffset = SonataPlayer.GetCurrentBeat(true);
