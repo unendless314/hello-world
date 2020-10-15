@@ -17,12 +17,16 @@ public class RunPlayer : MonoBehaviour
 	public float videoTime;
 	public float videoLength = 0;
 	public float showSAT;
+	public float showLength;    //可去除
+	public float showLengthInBeats;    //可去除
 
 	void Start()
 	{
 		movPlayer = GameObject.Find("Mov").GetComponent<VideoPlayer>();
 		videoTime = (float)movPlayer.time;
 		//videoLength = (float)movPlayer.clip.length;	//影片時間長度改為事先設定，不再讀取檔案長度
+		showLength = (float)movPlayer.clip.length; //可去除
+		showLengthInBeats = MyMath.SecondsToBeats(showLength, Song.BeatsPerMinute); //可去除
 	}
 
 	void Update()
@@ -42,6 +46,7 @@ public class RunPlayer : MonoBehaviour
 			AudioStopEventFired = false;
 			WasPlaying = true;
 			UpdateSmoothAudioTime();
+			showLengthInBeats = MyMath.SecondsToBeats(showLength, Song.BeatsPerMinute); //可去除
 		}
 
 		showSAT = SmoothAudioTime;
@@ -125,7 +130,7 @@ public class RunPlayer : MonoBehaviour
 		videoTime = (float)movPlayer.time;
 		//videoLength = (float)movPlayer.clip.length;	//影片時間長度改為事先設定，不再讀取檔案長度
 
-		//movPlayer.Play();	//影片不播放
+		movPlayer.Play();	//影片不播放
 
 		if (SmoothAudioTime < 0)    //負的秒數超過 offset 秒數的話，遊戲會直接開始
 		{
