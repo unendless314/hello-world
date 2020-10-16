@@ -17,16 +17,17 @@ public class RunPlayer : MonoBehaviour
 	public float videoTime;
 	public float videoLength = 0;
 	public float showSAT;
-	public float showLength;    //可去除
-	public float showLengthInBeats;    //可去除
+	//public float showLength;    //可去除
+	//public float showLengthInBeats;    //可去除
+	public float EndTriggerTime;	//因為 SmoothAudioTime 會自動修正無法累加至遊戲時間終點，所以需要一個不會自動修正的時鐘
 
 	void Start()
 	{
 		movPlayer = GameObject.Find("Mov").GetComponent<VideoPlayer>();
 		videoTime = (float)movPlayer.time;
 		//videoLength = (float)movPlayer.clip.length;	//影片時間長度改為事先設定，不再讀取檔案長度
-		showLength = (float)movPlayer.clip.length; //可去除
-		showLengthInBeats = MyMath.SecondsToBeats(showLength, Song.BeatsPerMinute); //可去除
+		//showLength = (float)movPlayer.clip.length; //可去除
+		//showLengthInBeats = MyMath.SecondsToBeats(showLength, Song.BeatsPerMinute); //可去除
 	}
 
 	void Update()
@@ -46,7 +47,7 @@ public class RunPlayer : MonoBehaviour
 			AudioStopEventFired = false;
 			WasPlaying = true;
 			UpdateSmoothAudioTime();
-			showLengthInBeats = MyMath.SecondsToBeats(showLength, Song.BeatsPerMinute); //可去除
+			//showLengthInBeats = MyMath.SecondsToBeats(showLength, Song.BeatsPerMinute); //可去除
 		}
 
 		showSAT = SmoothAudioTime;
@@ -73,7 +74,7 @@ public class RunPlayer : MonoBehaviour
 		}
 		*/
 
-		IsSongPlaying = false;
+		IsSongPlaying = false;	//應該要寫 false，但為了讓 smoothaudiotime 繼續跑，先開 true
 		SongFinished = true;    //讀取 movPlayer 的時間往往會有些微的秒數落後，造成無法順利結束，只好搬到外面
 		GetComponent<DrumGameplay>().PlayAndPause = false;
 		GetComponent<DrumGameplay>().StopSong = true;
@@ -84,15 +85,29 @@ public class RunPlayer : MonoBehaviour
 		//Smooth audio time is used because the audio.time has smaller discreet steps and therefore the notes wont move
 		//as smoothly. This uses Time.deltaTime to progress the audio time
 		SmoothAudioTime += Time.deltaTime;
+		EndTriggerTime += Time.deltaTime;
 
-		if (SmoothAudioTime >= videoLength) //播放畫面時間大於音檔長度時，遊戲結束
+		if (EndTriggerTime >= videoLength) //播放畫面時間大於音檔長度時，遊戲結束
 		{
 			SmoothAudioTime = videoLength;
 			OnSongStopped();
 		}
 
+		/*
+		if (SmoothAudioTime >= videoLength) //播放畫面時間大於音檔長度時，遊戲結束
+		{
+			SmoothAudioTime = videoLength;
+			OnSongStopped();
+
+		因為 SmoothAudioTime 只要一偏移，就會啟動修正機制，造成歌曲結束後無法累加 SmoothAudioTime 至遊戲結束所需門檻值
+
+		}
+		*/
+
 		//Sometimes the audio jumps or lags, this checks if the smooth audio time is off and corrects it
 		//making the notes jump or lag along with the audio track
+
+
 		if (IsSmoothAudioTimeOff())
 		{
 			CorrectSmoothAudioTime();
@@ -163,6 +178,8 @@ public class RunPlayer : MonoBehaviour
 		//movPlayer.Stop();   //影片不停止
 		movPlayer.time = 0;	//影片時間軸歸零
 		SmoothAudioTime = 0;    //畫面時間軸歸零
+		EndTriggerTime = 0; //累加時鐘歸零
+
 
 		WasPlaying = false;
 		IsSongPlaying = false;
