@@ -6,6 +6,7 @@ using System;
 public class DrumGameplay : MonoBehaviour
 {
 	public GameObject NotePrefab1, NotePrefab2, NotePrefab3, NotePrefab4, NotePrefab5, NotePrefab6, NotePrefab7, NotePrefab8;
+	public Transform NoteStart1, NoteStart2, NoteStart3, NoteStart4, NoteStart5, NoteStart6, NoteStart7, NoteStart8;
 	public Transform NoteEnd1, NoteEnd2, NoteEnd3, NoteEnd4, NoteEnd5, NoteEnd6, NoteEnd7, NoteEnd8;
 
 	public SonataSongData[] Playlist;
@@ -216,10 +217,19 @@ public class DrumGameplay : MonoBehaviour
 		float noteTime = note.Time;
 		float playerBeat = Player.GetCurrentBeat();
 
-        if (Player.videoTime < 0.3f)	//
+        if (Player.videoTime < 0.3f)
         {
 			return;
-        }
+			/*
+			 * 這就是遊戲開始時音符抖動的原因，遊戲初期要避免音符秀出來
+			 * 因為程式從 Video 擷取時間會比較慢
+			 * 但是 Update 已經先累加了 SmoothAudioTime
+			 * 電腦發現 SmoothAudioTime 領先 Video 時間太多
+			 * 所以又把 SmoothAudioTime 歸零
+			 * 連續的 領先-歸零 循環在畫面上看起來就像是音符前後震動
+			 * 這跟瞬間產生的音符的數量無關
+			 */
+		}
 
 		//If the note is farther away then 6 beats, its not visible on the neck and we dont have to update it
 		if (noteTime < playerBeat + 6)    //該音符的節拍屬性比目前播放中的節拍進度慢超過6拍時，就不再顯示音符
@@ -247,7 +257,7 @@ public class DrumGameplay : MonoBehaviour
             }
 
 			//Calculate how far the note has progressed on the neck
-			float progress = (noteTime - playerBeat - 1f) / 6f;   //吉他遊戲是差 0.5 拍，我改成差 1 拍
+			float progress = (noteTime - playerBeat - 7) / 6f;   //吉他遊戲是差 0.5 拍，我改成差 7 拍
 																  //這裡面的參數是特別調整過的，更改的話視覺效果會很怪異
 			//Update its position
 			Vector3 position = NoteObjects[index].transform.position;
@@ -280,21 +290,21 @@ public class DrumGameplay : MonoBehaviour
         switch (StringIndex)
         {
 			case 0:
-				return 1.49389f + 0.1f;	//我真的不知道該怎麼修 = =
+				return NoteStart1.position.y; //參考值 1.49389f + 0.1f
 			case 1:
-				return 1.886292f;	//我以為加上最高點 Y 高度就能補正，結果失敗只好先取最高與最低點平均值
+				return NoteStart2.position.y;   //參考值 1.886292f
 			case 2:
-				return 1.197582f + 0.1f;	//我真的不知道該怎麼修 = =
+				return NoteStart3.position.y;    //參考值 1.197582f + 0.1f
 			case 3:
-				return 1.357637f;	//我以為加上最高點 Y 高度就能補正，結果失敗只好先取最高與最低點平均值
+				return NoteStart4.position.y;   //參考值 1.357637f
 			case 4:
-				return 1.351201f;	//我以為加上最高點 Y 高度就能補正，結果失敗只好先取最高與最低點平均值
+				return NoteStart5.position.y;   //參考值 1.351201f
 			case 5:
-				return 1.220011f + 0.1f;    //我真的不知道該怎麼修 = =
+				return NoteStart6.position.y;    //參考值 1.220011f + 0.1f
 			case 6:
-				return 1.731068f;
+				return NoteStart7.position.y;   //參考值 1.731068f
 			case 7:
-				return 0.12f;
+				return NoteStart8.position.y;   //參考值 0.12f
 			default:
 				return 0;
 		}
@@ -310,21 +320,21 @@ public class DrumGameplay : MonoBehaviour
 		switch (StringIndex)
 		{
 			case 0:
-				return -1.275f;
+				return NoteStart1.position.z;	//參考值 -1.275f
 			case 1:
-				return -0.95f;
+				return NoteStart2.position.z;  //參考值 -0.95f
 			case 2:
-				return -1.275f;
+				return NoteStart3.position.z; //參考值 -1.275f
 			case 3:
-				return -1.15f;
+				return NoteStart4.position.z;  //參考值 -1.15f
 			case 4:
-				return -1.15f;
+				return NoteStart5.position.z;  //參考值 -1.15f
 			case 5:
-				return -1.275f;
+				return NoteStart6.position.z; //參考值 -1.275f
 			case 6:
-				return -1.275f;
+				return NoteStart7.position.z; //參考值 -1.275f
 			case 7:
-				return -1.4f;
+				return NoteStart8.position.z;   //參考值 -1.4f
 			default:
 				return 0;
 		}
@@ -377,21 +387,21 @@ public class DrumGameplay : MonoBehaviour
 			//事實證明了，在哪裡產生音符根本不重要，因為起點位置其實是由 update position 來決定的
 
 			case 0:
-				return NoteEnd1.position; //new Vector3(-0.8881167f, 1.915157f, 2.402217f)
+				return NoteStart1.position; //new Vector3(-0.8881167f, 1.915157f, 2.402217f)
 			case 1:
-				return NoteEnd2.position; //new Vector3(-0.7173551f, 2.307558f, 2.930837f)
+				return NoteStart2.position; //new Vector3(-0.7173551f, 2.307558f, 2.930837f)
 			case 2:
-				return NoteEnd3.position; //new Vector3(-0.532649f, 1.618849f, 2.453747f)
+				return NoteStart3.position; //new Vector3(-0.532649f, 1.618849f, 2.453747f)
 			case 3:
-				return NoteEnd4.position; //new Vector3(-0.1783119f, 1.778903f, 3.094725f)
+				return NoteStart4.position; //new Vector3(-0.1783119f, 1.778903f, 3.094725f)
 			case 4:
-				return NoteEnd5.position; //new Vector3(0.1466231f, 1.772468f, 3.111839f)
+				return NoteStart5.position; //new Vector3(0.1466231f, 1.772468f, 3.111839f)
 			case 5:
-				return NoteEnd6.position; //new Vector3(0.5819693f, 1.641277f, 2.504729f)
+				return NoteStart6.position; //new Vector3(0.5819693f, 1.641277f, 2.504729f)
 			case 6:
-				return NoteEnd7.position; //new Vector3(0.851892f, 2.152334f, 2.714823f)
+				return NoteStart7.position; //new Vector3(0.851892f, 2.152334f, 2.714823f)
 			case 7:
-				return NoteEnd8.position; //new Vector3(0.0003564757f, 0.12f, -1.4f)
+				return NoteStart8.position; //new Vector3(0.0003564757f, 0.12f, -1.4f)
 			default:
 				return new Vector3(0f, 0f, 0f);
 		}
