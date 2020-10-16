@@ -5,8 +5,8 @@ using System;
 
 public class DrumGameplay : MonoBehaviour
 {
-	public GameObject NotePrefab1, NotePrefab2, NotePrefab3, NotePrefab4, NotePrefab5, NotePrefab6, NotePrefab7;
-	public Transform NoteEnd1, NoteEnd2, NoteEnd3, NoteEnd4, NoteEnd5, NoteEnd6, NoteEnd7;
+	public GameObject NotePrefab1, NotePrefab2, NotePrefab3, NotePrefab4, NotePrefab5, NotePrefab6, NotePrefab7, NotePrefab8;
+	public Transform NoteEnd1, NoteEnd2, NoteEnd3, NoteEnd4, NoteEnd5, NoteEnd6, NoteEnd7, NoteEnd8;
 
 	public SonataSongData[] Playlist;
 	public int ChooseSongNumber;
@@ -38,6 +38,8 @@ public class DrumGameplay : MonoBehaviour
 		Colors[4] = new Color(1, 0, 0, 1);
 		Colors[5] = new Color(1, 0.92f, 0.016f, 1);
 		Colors[6] = new Color(0.5f, 0.5f, 0.5f, 1);
+
+		Colors[7] = new Color(1, 1, 1, 1);
 		*/
 
 		PlayAndPause = false;
@@ -96,15 +98,17 @@ public class DrumGameplay : MonoBehaviour
 	{
 		SonataSongData[] playlist = GetComponent<DrumGameplay>().GetPlaylist();
 		Player.SetSong(Playlist[playlistIndex]);
+		CreateNoteObjects();    //這裡不可以瞬間生成，那順序調換的話呢?
+
 		Player.Play();
-		CreateNoteObjects();
+		//CreateNoteObjects();	//這裡不可以瞬間生成，那順序調換的話呢?
 	}
 
 	protected void CreateNoteObjects()
 	{
 		NoteObjects.Clear();
 
-		for (int i = 0; i < Player.Song.Notes.Count; ++i)
+		for (int i = 0; i < Player.Song.Notes.Count; ++i)   //Player.Song.Notes.Count
 		{
 			GameObject note = InstantiateNoteFromPrefab(Player.Song.Notes[i].StringIndex);
 
@@ -212,6 +216,11 @@ public class DrumGameplay : MonoBehaviour
 		float noteTime = note.Time;
 		float playerBeat = Player.GetCurrentBeat();
 
+        if (Player.videoTime < 0.3f)	//
+        {
+			return;
+        }
+
 		//If the note is farther away then 6 beats, its not visible on the neck and we dont have to update it
 		if (noteTime < playerBeat + 6)    //該音符的節拍屬性比目前播放中的節拍進度慢超過6拍時，就不再顯示音符
 		{
@@ -242,7 +251,7 @@ public class DrumGameplay : MonoBehaviour
 																  //這裡面的參數是特別調整過的，更改的話視覺效果會很怪異
 			//Update its position
 			Vector3 position = NoteObjects[index].transform.position;
-
+			
 			position.y = progress * GetYDisplacement() + GetYOffset(Player.Song.Notes[index].StringIndex);	//
 			position.z = progress * GetZDisplacement() + GetZOffset(Player.Song.Notes[index].StringIndex);  //
 			NoteObjects[index].transform.position = position;
@@ -284,6 +293,8 @@ public class DrumGameplay : MonoBehaviour
 				return 1.220011f + 0.1f;    //我真的不知道該怎麼修 = =
 			case 6:
 				return 1.731068f;
+			case 7:
+				return 0.12f;
 			default:
 				return 0;
 		}
@@ -312,6 +323,8 @@ public class DrumGameplay : MonoBehaviour
 				return -1.275f;
 			case 6:
 				return -1.275f;
+			case 7:
+				return -1.4f;
 			default:
 				return 0;
 		}
@@ -350,6 +363,8 @@ public class DrumGameplay : MonoBehaviour
 				return NotePrefab6;
 			case 6:
 				return NotePrefab7;
+			case 7:
+				return NotePrefab8;
 			default:
 				return NotePrefab1;
 		}
@@ -359,20 +374,24 @@ public class DrumGameplay : MonoBehaviour
 	{
 		switch (stringIndex)
 		{
+			//事實證明了，在哪裡產生音符根本不重要，因為起點位置其實是由 update position 來決定的
+
 			case 0:
-				return new Vector3(-0.8881167f, 1.915157f, 2.402217f);
+				return NoteEnd1.position; //new Vector3(-0.8881167f, 1.915157f, 2.402217f)
 			case 1:
-				return new Vector3(-0.7173551f, 2.307558f, 2.930837f);
+				return NoteEnd2.position; //new Vector3(-0.7173551f, 2.307558f, 2.930837f)
 			case 2:
-				return new Vector3(-0.532649f, 1.618849f, 2.453747f);
+				return NoteEnd3.position; //new Vector3(-0.532649f, 1.618849f, 2.453747f)
 			case 3:
-				return new Vector3(-0.1783119f, 1.778903f, 3.094725f);
+				return NoteEnd4.position; //new Vector3(-0.1783119f, 1.778903f, 3.094725f)
 			case 4:
-				return new Vector3(0.1466231f, 1.772468f, 3.111839f);
+				return NoteEnd5.position; //new Vector3(0.1466231f, 1.772468f, 3.111839f)
 			case 5:
-				return new Vector3(0.5819693f, 1.641277f, 2.504729f);
+				return NoteEnd6.position; //new Vector3(0.5819693f, 1.641277f, 2.504729f)
 			case 6:
-				return new Vector3(0.851892f, 2.152334f, 2.714823f);
+				return NoteEnd7.position; //new Vector3(0.851892f, 2.152334f, 2.714823f)
+			case 7:
+				return NoteEnd8.position; //new Vector3(0.0003564757f, 0.12f, -1.4f)
 			default:
 				return new Vector3(0f, 0f, 0f);
 		}
@@ -399,6 +418,9 @@ public class DrumGameplay : MonoBehaviour
 				return Quaternion.identity; //Quaternion.Euler(0, 0, 21.568f);
 			case 6:
 				return Quaternion.identity; //Quaternion.Euler(0, 0, 56.247f);
+
+			case 7:
+				return Quaternion.identity; //Quaternion.Euler(0, 0, 0);
 			default:
 				return Quaternion.identity;
 		}
@@ -423,6 +445,8 @@ public class DrumGameplay : MonoBehaviour
 				return -0.5f;
 			case 6:   
 				return -0.5f;
+			case 7:
+				return -0.5f;
 			default:    //預設值，推測用不到，寫保險的
 				return -0.5f;
 		}	
@@ -446,6 +470,8 @@ public class DrumGameplay : MonoBehaviour
 				return NoteEnd6.position.z;
 			case 6:   
 				return NoteEnd7.position.z;
+			case 7:
+				return NoteEnd8.position.z;
 			default:    
 				return -2f;
 		}
